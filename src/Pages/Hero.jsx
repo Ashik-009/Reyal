@@ -16,9 +16,9 @@ const Hero = () => {
       id: 1,
       image: heroImage1,
       leftNav: 'MAN',
-      leftPath: '/man',     // Added explicit paths
+      leftPath: '/man',
       rightNav: 'WOMAN',
-      rightPath: '/women',  // Pluralized to match App.jsx route!
+      rightPath: '/women',
       btnText: 'SHOP ONLINE'
     },
     {
@@ -42,7 +42,7 @@ const Hero = () => {
   ];
 
   return (
-    <div className="h-screen w-full bg-neutral-950 font-sans">
+    <div className="h-dvh w-full bg-neutral-950 font-sans">
       
       <Swiper
         direction={'vertical'}
@@ -65,19 +65,19 @@ const Hero = () => {
             <div className="relative h-full w-full flex items-center justify-center">
               
               <div 
-                className="absolute inset-0 w-full h-full scale-110"
+                className="absolute inset-0 w-full h-full scale-100 sm:scale-110"
                 data-swiper-parallax-y="30%"
               >
                 <img 
                   src={slide.image} 
                   alt="Fashion Model" 
-                  className="w-full h-full object-cover object-top"
+                  className="w-full h-full object-cover object-center sm:object-top"
                 />
               </div>
               
               <div className="absolute inset-0 bg-linear-to-b from-black/40 via-transparent to-black/60 z-10"></div>
 
-              {/* LEFT NAVIGATION (< MAN) - Using exact path */}
+              {/* LEFT NAVIGATION (< MAN) */}
               <Link 
                 to={slide.leftPath} 
                 className="absolute left-6 lg:left-12 top-1/2 -translate-y-1/2 flex items-center gap-2 text-white hover:text-yellow-500 transition-colors group z-20"
@@ -88,7 +88,7 @@ const Hero = () => {
                 <span className="text-[10px] sm:text-xs font-bold tracking-[0.3em] mt-0.5">{slide.leftNav}</span>
               </Link>
 
-              {/* RIGHT NAVIGATION (WOMAN >) - Using exact path */}
+              {/* RIGHT NAVIGATION (WOMAN >) */}
               <Link 
                 to={slide.rightPath} 
                 className="absolute right-6 lg:right-12 top-1/2 -translate-y-1/2 flex items-center gap-2 text-white hover:text-yellow-500 transition-colors group z-20"
@@ -100,11 +100,10 @@ const Hero = () => {
               </Link>
 
               {/* BOTTOM LEFT BUTTON */}
-              <div className="absolute bottom-12 sm:bottom-16 left-6 lg:left-12 z-20">
+              <div className="absolute bottom-16 sm:bottom-16 left-6 lg:left-12 z-20">
                 <div data-swiper-parallax="-100" data-swiper-parallax-opacity="0">
                     <button className="rounded-xl group relative overflow-hidden border border-white px-8 py-3 sm:px-10 sm:py-4 text-[10px] sm:text-xs font-bold tracking-[0.2em] text-white transition-all duration-300 hover:border-[#cc0000]">
-                        {/* Fixed duration-[400ms] here! */}
-                        <span className="absolute inset-0 w-0 bg-[#cc0000] transition-all duration-400 ease-out group-hover:w-full"></span>
+                        <span className="absolute inset-0 w-0 bg-[#cc0000] transition-all duration-500 ease-out group-hover:w-full"></span>
                         <span className="relative z-10">{slide.btnText}</span>
                     </button>
                 </div>

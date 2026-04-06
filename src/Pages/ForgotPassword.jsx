@@ -39,7 +39,7 @@ const ForgotPassword = () => {
       {/* Main Card Container */}
       <div className="bg-neutral-900 rounded-2xl shadow-2xl border border-white/5 overflow-hidden w-full max-w-lg p-8 sm:p-12 mt-8">
         
-        <h2 className="text-2xl font-black text-white tracking-[0.1em] uppercase mb-2 text-center">
+        <h2 className="text-2xl font-black text-white tracking-widest uppercase mb-2 text-center">
           RESET PASSWORD
         </h2>
         <p className="text-xs tracking-widest text-gray-400 text-center mb-8 leading-relaxed">

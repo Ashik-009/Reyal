@@ -72,14 +72,14 @@ const WomenCategories = () => {
           <div 
             key={category.id}
             onClick={() => category.subCategories ? setActiveModal(category) : console.log(`Go to ${category.name} page`)}
-            className="group relative h-[400px] lg:h-[500px] w-full rounded-2xl overflow-hidden cursor-pointer bg-neutral-900"
+            className="group relative h-100 lg:h-125 w-full rounded-2xl overflow-hidden cursor-pointer bg-neutral-900"
           >
             <img 
               src={category.image} 
               alt={category.name} 
               className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 ease-in-out"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+            <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent"></div>
 
             <h3 className="absolute bottom-4 left-4 right-4 text-5xl lg:text-6xl font-black text-white/90 uppercase leading-[0.85] tracking-tighter drop-shadow-xl group-hover:text-white transition-colors duration-300">
               {category.name.split(' ').map((word, idx) => (
@@ -103,28 +103,28 @@ const WomenCategories = () => {
                 {activeModal.name}
               </h4>
               <div className="absolute right-6 top-1/2 -translate-y-1/2 flex flex-col gap-2">
-                 <div className="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-b-[6px] border-b-gray-400"></div>
-                 <div className="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[6px] border-t-gray-400"></div>
+                 <div className="w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-b-[6px] border-b-gray-400"></div>
+                 <div className="w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-[6px] border-t-gray-400"></div>
               </div>
             </div>
 
             <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
               {activeModal.subCategories?.map((sub, idx) => (
                 <div key={idx} className="group cursor-pointer">
-                  <div className="relative h-[300px] sm:h-[400px] w-full rounded-xl overflow-hidden mb-3">
+                  <div className="relative h-75 sm:h-100 w-full rounded-xl overflow-hidden mb-3">
                     <img 
                       src={sub.image} 
                       alt={sub.name} 
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                    <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent"></div>
                     <h5 className="absolute bottom-4 left-0 w-full text-center text-4xl font-black text-white uppercase leading-none tracking-tight drop-shadow-md">
                       {sub.name.split(' ').map((word, i) => (
                         <span key={i} className="block">{word}</span>
                       ))}
                     </h5>
                   </div>
-                  <p className="text-center text-[10px] font-bold tracking-[0.1em] text-gray-900 uppercase group-hover:text-[#cc0000] transition-colors">
+                  <p className="text-center text-[10px] font-bold tracking-widest text-gray-900 uppercase group-hover:text-[#cc0000] transition-colors">
                     {sub.subtitle}
                   </p>
                 </div>

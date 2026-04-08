@@ -3,11 +3,15 @@ import logo from '../Images/reyal-logo.png';
 import { Link } from 'react-router-dom';
 import fullSleeveImg from '../Images/full-sleeve.jpg';
 import halfSleeveImg from '../Images/half-sleeve.jpg';
+import { useSelector , useDispatch } from 'react-redux';
+import { toggleCart } from '../redux/cartSlice';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState('MAN');
   const [activeModal, setActiveModal] = useState(null);
+  const totalQuantity = useSelector(state => state.cart.totalQuantity);
+  const dispatch = useDispatch();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -18,24 +22,41 @@ const Navbar = () => {
     setOpenDropdown(openDropdown === category ? null : category);
   };
 
+  // 1. Added paths to the modal subcategories
   const casualShirtsModalData = {
     name: 'CASUAL SHIRTS',
     subCategories: [
-      { name: 'FULL SLEEVES', subtitle: 'FULL SLEEVES SHIRT', image: fullSleeveImg, path: '#' },
-      { name: 'HALF SLEEVES', subtitle: 'HALF SLEEVES SHIRT', image: halfSleeveImg, path: '#' }
+      { name: 'FULL SLEEVES', subtitle: 'FULL SLEEVES SHIRT', image: fullSleeveImg, path: '/collections/casual-full-sleeves' },
+      { name: 'HALF SLEEVES', subtitle: 'HALF SLEEVES SHIRT', image: halfSleeveImg, path: '/collections/casual-half-sleeves' }
     ]
   };
 
+  // 2. Added explicit dynamic paths to ALL Men's categories
   const manCategories = [
-    { name: 'NEW ARRIVAL', isRed: true }, { name: 'PANJABI' }, { name: 'CASUAL SHIRTS', hasModal: true }, 
-    { name: 'FORMAL SHIRTS' }, { name: 'POLO' }, { name: 'T-SHIRTS' }, { name: 'JEANS' }, 
-    { name: 'CARGO' }, { name: 'TWILL PANTS' }, { name: 'FORMAL PANTS' }, { name: 'PAJAMA' }, 
-    { name: 'SHORTS' }, { name: 'BLAZERS' }, { name: 'SUITS' }
+    { name: 'NEW ARRIVAL', isRed: true, path: '/new-arrivals' }, 
+    { name: 'PANJABI', path: '/collections/panjabi' }, 
+    { name: 'CASUAL SHIRTS', hasModal: true }, 
+    { name: 'FORMAL SHIRTS', path: '/collections/formal' }, 
+    { name: 'POLO', path: '/collections/polo' }, 
+    { name: 'T-SHIRTS', path: '/collections/t-shirts' }, 
+    { name: 'JEANS', path: '/collections/jeans' }, 
+    { name: 'CARGO', path: '/collections/cargo' }, 
+    { name: 'TWILL PANTS', path: '/collections/twill-pants' }, 
+    { name: 'FORMAL PANTS', path: '/collections/formal-pants' }, 
+    { name: 'PAJAMA', path: '/collections/pajama' }, 
+    { name: 'SHORTS', path: '/collections/shorts' }, 
+    { name: 'BLAZERS', path: '/collections/blazers' }, 
+    { name: 'SUITS', path: '/collections/suits' }
   ];
 
+  // 3. Added explicit dynamic paths to ALL Women's categories
   const womenCategories = [
-    { name: 'NEW ARRIVAL', isRed: true }, { name: 'KURTI' }, { name: 'DRESSES' }, 
-    { name: 'TOPS' }, { name: 'JUMPSUIT' }, { name: 'BOTTOM' }
+    { name: 'NEW ARRIVAL', isRed: true, path: '/new-arrivals' }, 
+    { name: 'KURTI', path: '/collections/kurti' }, 
+    { name: 'DRESSES', path: '/collections/dresses' }, 
+    { name: 'TOPS', path: '/collections/tops' }, 
+    { name: 'JUMPSUIT', path: '/collections/jumpsuit' }, 
+    { name: 'BOTTOM', path: '/collections/bottom' }
   ];
 
   const infoCategories = [
@@ -43,7 +64,6 @@ const Navbar = () => {
     { name: 'Privacy Policy' }, { name: 'Refund & Return Policy' }
   ];
 
-  // Helper function to safely close menu on mobile
   const handleLinkClick = () => {
     setIsMenuOpen(false);
   };
@@ -82,7 +102,7 @@ const Navbar = () => {
             <Link to="/login" className="text-[11px] font-bold tracking-[0.25em] text-gray-300 hover:text-yellow-500 transition-colors hidden md:block mt-0.5">LOGIN</Link>
             <Link to="/help" className="text-[11px] font-bold tracking-[0.25em] text-gray-300 hover:text-yellow-500 transition-colors hidden md:block mt-0.5">HELP</Link>
             
-            {/* FIX 1: Mobile User Icon (Only shows on mobile!) */}
+            {/* Mobile User Icon */}
             <Link to="/login" onClick={handleLinkClick} className="text-gray-300 hover:text-yellow-500 transition-colors md:hidden focus:outline-none">
                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 sm:w-6 sm:h-6">
                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
@@ -90,11 +110,14 @@ const Navbar = () => {
             </Link>
 
             {/* Cart Icon */}
-            <button className="flex items-center gap-2 text-gray-300 hover:text-yellow-500 transition-colors focus:outline-none group">
+            <button 
+              onClick={() => dispatch(toggleCart())} 
+              className="flex items-center gap-2 text-gray-300 hover:text-yellow-500 transition-colors focus:outline-none group">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 lg:w-6 lg:h-6 group-hover:-translate-y-1 transition-transform">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
               </svg>
-              <span className="text-sm lg:text-base font-medium mt-0.5">0</span>
+                {/* The magic happens here! */}
+              <span className="text-sm lg:text-base font-medium mt-0.5">{totalQuantity}</span>
             </button>
           </div>
 
@@ -105,7 +128,6 @@ const Navbar = () => {
       <div className={`fixed inset-0 bg-black/80 backdrop-blur-sm z-40 transition-opacity duration-500 ${isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`} onClick={toggleMenu}></div>
       
       {/* SLIDE-OUT SIDEBAR */}
-      {/* FIX 2: Changed h-full to h-[100dvh] for perfect mobile sizing */}
       <div className={`fixed top-0 left-0 h-dvh w-full sm:w-100 bg-neutral-950 border-r border-yellow-500/20 z-50 transform transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] flex flex-col ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         
         <div className="flex-none flex items-center justify-between p-8 sm:p-12 pb-6">
@@ -117,7 +139,6 @@ const Navbar = () => {
           </button>
         </div>
 
-        {/* Added massive bottom padding (pb-32) so mobile browsers don't cut off the bottom text */}
         <div className="flex-1 overflow-y-auto px-8 sm:px-12 pb-32 hide-scroll" style={{ WebkitOverflowScrolling: 'touch' }}>
           <nav className="flex flex-col gap-6 mt-4">
             
@@ -146,8 +167,9 @@ const Navbar = () => {
                         <span className="text-sm font-light">+</span>
                       </button>
                     ) : (
+                      // 4. Changed to={item.path}
                       <Link 
-                        to="/man" 
+                        to={item.path} 
                         onClick={handleLinkClick} 
                         className={`text-[11px] sm:text-xs font-normal tracking-[0.15em] transition-colors flex items-center justify-between w-full sm:w-4/5 ${
                           item.isRed ? 'text-[#cc0000] hover:text-red-400 font-medium' : 'text-gray-400 hover:text-white'
@@ -176,9 +198,10 @@ const Navbar = () => {
 
               <div className={`flex flex-col gap-4 ml-4 overflow-hidden transition-all duration-500 ease-in-out ${openDropdown === 'WOMEN' ? 'max-h-200 opacity-100 mt-6' : 'max-h-0 opacity-0 mt-0'}`}>
                 {womenCategories.map((item, idx) => (
+                  // 5. Changed to={item.path}
                   <Link 
                     key={`woman-${idx}`} 
-                    to="/women" 
+                    to={item.path} 
                     onClick={handleLinkClick}
                     className={`text-[11px] sm:text-xs font-normal tracking-[0.15em] transition-colors flex items-center justify-between w-full sm:w-4/5 ${
                       item.isRed ? 'text-[#cc0000] hover:text-red-400 font-medium' : 'text-gray-400 hover:text-white'
@@ -218,7 +241,6 @@ const Navbar = () => {
               <span className="text-[10px] font-bold tracking-[0.2em] text-gray-400 group-hover:text-yellow-500 transition-colors">SEARCH</span>
               <div className="w-full max-w-25 h-px bg-gray-600 group-hover:bg-yellow-500 transition-colors"></div>
             </div>
-            {/* Kept these here just in case, but they now properly close the menu when clicked */}
             <Link to="/login" onClick={handleLinkClick} className="text-[10px] font-bold tracking-[0.2em] text-gray-400 hover:text-yellow-500">LOGIN</Link>
             <Link to="/help" onClick={handleLinkClick} className="text-[10px] font-bold tracking-[0.2em] text-gray-400 hover:text-yellow-500">HELP</Link>
           </div>

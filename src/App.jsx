@@ -6,18 +6,19 @@ import Navbar from './Pages/Navbar'
 import Help from './Pages/Help';
 import Login from './Pages/Login'; 
 import ForgotPassword from './Pages/ForgotPassword';
-
 import Footer from './Pages/Footer';
-import About from './pages/About';
-import Terms from './pages/Terms';
-import Privacy from './pages/Privacy';
-import Refunds from './pages/Refunds';
-import IntellectualProperty from './pages/IntellectualProperty';
 
-import HowToOrder from './pages/HowToOrder';
-import BillingPayments from './pages/BillingPayments';
-import TrackOrders from './pages/TrackOrders';
-import Replacement from './pages/Replacement';
+// 🛠️ THE FIX: Changed all these imports from './pages/...' to './Pages/...'
+import About from './Pages/About';
+import Terms from './Pages/Terms';
+import Privacy from './Pages/Privacy';
+import Refunds from './Pages/Refunds';
+import IntellectualProperty from './Pages/IntellectualProperty';
+
+import HowToOrder from './Pages/HowToOrder';
+import BillingPayments from './Pages/BillingPayments';
+import TrackOrders from './Pages/TrackOrders';
+import Replacement from './Pages/Replacement';
 
 // The new dynamic product pages!
 import NewArrivals from './Pages/NewArrivals';
@@ -66,7 +67,6 @@ const App = () => {
             <Route path="/track-orders" element={<TrackOrders />} />
             <Route path="/replacement-policy" element={<Replacement />} />
             
-            {/* 🔍 NEW: Search Results Route */}
             <Route path="/search" element={<SearchResults />} />
           </Routes>
         </div>

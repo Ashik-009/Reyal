@@ -10,34 +10,38 @@ import heroImage1 from '../Images/hero1.jpg';
 import heroImage2 from '../Images/hero2.jpg';
 import heroImage3 from '../Images/hero3.jpg';
 
-const Hero = () => {
+const HomeHero = () => {
+  // Updated slides: Left always points to MAN, Right always points to WOMEN
   const slides = [
     {
       id: 1,
       image: heroImage1,
-      leftNav: 'MAN',
-      leftPath: '/man',
-      rightNav: 'WOMAN',
-      rightPath: '/women',
-      btnText: 'SHOP ONLINE'
+      leftNav: 'SHOP MAN',
+      leftPath: '/collections/man', 
+      rightNav: 'SHOP WOMEN',
+      rightPath: '/collections/women',
+      btnText: 'SHOP ONLINE',
+      btnPath: '/shop'
     },
     {
       id: 2,
       image: heroImage2,
-      leftNav: 'MAN',
-      leftPath: '/man',
-      rightNav: 'WOMAN',
-      rightPath: '/women',
-      btnText: 'NEW ARRIVALS'
+      leftNav: 'SHOP MAN',
+      leftPath: '/collections/man',
+      rightNav: 'SHOP WOMEN',
+      rightPath: '/collections/women', 
+      btnText: 'SHOP ONLINE',
+      btnPath: '/shop'
     },
     {
       id: 3,
       image: heroImage3,
-      leftNav: 'MAN',
-      leftPath: '/man',
-      rightNav: 'WOMAN',
-      rightPath: '/women',
-      btnText: 'VIEW COLLECTION'
+      leftNav: 'SHOP MAN',
+      leftPath: '/collections/man',
+      rightNav: 'SHOP WOMEN',
+      rightPath: '/collections/women',
+      btnText: 'SHOP ONLINE',
+      btnPath: '/shop'
     }
   ];
 
@@ -77,7 +81,7 @@ const Hero = () => {
               
               <div className="absolute inset-0 bg-linear-to-b from-black/40 via-transparent to-black/60 z-10"></div>
 
-              {/* LEFT NAVIGATION (< MAN) */}
+              {/* LEFT NAVIGATION (< SHOP MAN) */}
               <Link 
                 to={slide.leftPath} 
                 className="absolute left-6 lg:left-12 top-1/2 -translate-y-1/2 flex items-center gap-2 text-white hover:text-yellow-500 transition-colors group z-20"
@@ -88,10 +92,10 @@ const Hero = () => {
                 <span className="text-[10px] sm:text-xs font-bold tracking-[0.3em] mt-0.5">{slide.leftNav}</span>
               </Link>
 
-              {/* RIGHT NAVIGATION (WOMAN >) */}
+              {/* RIGHT NAVIGATION (SHOP WOMEN >) */}
               <Link 
                 to={slide.rightPath} 
-                className="absolute right-6 lg:right-12 top-1/2 -translate-y-1/2 flex items-center gap-2 text-white hover:text-yellow-500 transition-colors group z-20"
+                className="absolute right-6 lg:right-12 top-1/2 -translate-y-1/2 flex items-center gap-2 text-white hover:text-[#cc0000] transition-colors group z-20"
               >
                 <span className="text-[10px] sm:text-xs font-bold tracking-[0.3em] mt-0.5">{slide.rightNav}</span>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform">
@@ -102,10 +106,10 @@ const Hero = () => {
               {/* BOTTOM LEFT BUTTON */}
               <div className="absolute bottom-16 sm:bottom-16 left-6 lg:left-12 z-20">
                 <div data-swiper-parallax="-100" data-swiper-parallax-opacity="0">
-                    <button className="rounded-xl group relative overflow-hidden border border-white px-8 py-3 sm:px-10 sm:py-4 text-[10px] sm:text-xs font-bold tracking-[0.2em] text-white transition-all duration-300 hover:border-[#cc0000]">
+                    <Link to={slide.btnPath} className="inline-block rounded-xl group relative overflow-hidden border border-white px-8 py-3 sm:px-10 sm:py-4 text-[10px] sm:text-xs font-bold tracking-[0.2em] text-white transition-all duration-300 hover:border-[#cc0000]">
                         <span className="absolute inset-0 w-0 bg-[#cc0000] transition-all duration-500 ease-out group-hover:w-full"></span>
                         <span className="relative z-10">{slide.btnText}</span>
-                    </button>
+                    </Link>
                 </div>
               </div>
 
@@ -119,4 +123,4 @@ const Hero = () => {
   );
 };
 
-export default Hero;
+export default HomeHero;

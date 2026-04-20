@@ -38,15 +38,20 @@ const cartSlice = createSlice({
       );
 
       state.totalQuantity++;
-      const priceNumber = Number(newItem.price.replace(/[^0-9.-]+/g, ""));
+      
+      // FIX: Safely check if the price is a String (old data) or Number (MongoDB)
+      const priceNumber = typeof newItem.price === 'string' 
+        ? Number(newItem.price.replace(/[^0-9.-]+/g, "")) 
+        : Number(newItem.price);
+
       state.totalAmount += priceNumber;
 
       if (!existingItem) {
         state.items.push({
           id: newItem.id,
           name: newItem.name,
-          price: newItem.price,
-          priceNumber: priceNumber,
+          price: newItem.price, // Keep the original format for display
+          priceNumber: priceNumber, // Use this for pure math
           image: newItem.image,
           size: newItem.size,
           quantity: 1,
@@ -69,6 +74,41 @@ const cartSlice = createSlice({
         state.items = state.items.filter(item => !(item.id === id && item.size === size));
       }
     },
+    
+    // ➕ NEW: Increase Quantity Logic
+    increaseQuantity(state, action) {
+      const { id, size } = action.payload;
+      const existingItem = state.items.find(item => item.id === id && item.size === size);
+
+      if (existingItem) {
+        existingItem.quantity++;
+        existingItem.totalPrice += existingItem.priceNumber;
+        state.totalQuantity++;
+        state.totalAmount += existingItem.priceNumber;
+      }
+    },
+
+    // ➖ NEW: Decrease Quantity Logic
+    decreaseQuantity(state, action) {
+      const { id, size } = action.payload;
+      const existingItem = state.items.find(item => item.id === id && item.size === size);
+
+      if (existingItem) {
+        if (existingItem.quantity === 1) {
+          // If they click minus when quantity is 1, remove the item entirely
+          state.totalQuantity--;
+          state.totalAmount -= existingItem.priceNumber;
+          state.items = state.items.filter(item => !(item.id === id && item.size === size));
+        } else {
+          // Otherwise, just decrease by 1
+          existingItem.quantity--;
+          existingItem.totalPrice -= existingItem.priceNumber;
+          state.totalQuantity--;
+          state.totalAmount -= existingItem.priceNumber;
+        }
+      }
+    },
+
     clearCart(state) {
       state.items = [];
       state.totalQuantity = 0;
@@ -78,5 +118,14 @@ const cartSlice = createSlice({
   },
 });
 
-export const { addToCart, toggleCart, removeItem, clearCart } = cartSlice.actions;
+// Make sure to export the new actions so the CartDrawer can use them!
+export const { 
+  addToCart, 
+  toggleCart, 
+  removeItem, 
+  increaseQuantity, 
+  decreaseQuantity, 
+  clearCart 
+} = cartSlice.actions;
+
 export default cartSlice.reducer;

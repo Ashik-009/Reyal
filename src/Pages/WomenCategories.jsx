@@ -1,57 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+// 🗺️ 1. The Image Dictionary: Maps your DB slugs to your images
+// You can replace these Unsplash links with your local imports (e.g., import topsImg from '../Images/tops.jpg')
+const categoryImages = {
+  'new-arrivals': 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=800&auto=format&fit=crop',
+  'women-kurti': 'https://images.unsplash.com/photo-1610030469983-98e550d61dc0?q=80&w=800&auto=format&fit=crop',
+  'women-dresses': 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=800&auto=format&fit=crop',
+  'women-maxi-dresses': 'https://images.unsplash.com/photo-1572804013427-4d7ca7268217?q=80&w=800&auto=format&fit=crop',
+  'women-midi-dresses': 'https://images.unsplash.com/photo-1515347619152-169824056262?q=80&w=800&auto=format&fit=crop',
+  'women-tops': 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=800&auto=format&fit=crop',
+  'women-jumpsuit': 'https://images.unsplash.com/photo-1485231183945-ffe14b8a43ec?q=80&w=800&auto=format&fit=crop',
+  'women-bottoms': 'https://images.unsplash.com/photo-1509551388413-e18d0ac5d495?q=80&w=800&auto=format&fit=crop',
+};
+
+// Premium fallback image for any brand new categories added in the Admin panel
+const fallbackImage = 'https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=800&auto=format&fit=crop';
 
 const WomenCategories = () => {
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeModal, setActiveModal] = useState(null);
+  const navigate = useNavigate();
 
-  const categories = [
-    {
-      id: 1,
-      name: 'NEW ARRIVAL',
-      image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=800&auto=format&fit=crop',
-      subCategories: null 
-    },
-    {
-      id: 2,
-      name: 'KURTI',
-      image: 'https://images.unsplash.com/photo-1610030469983-98e550d61dc0?q=80&w=800&auto=format&fit=crop',
-      subCategories: null
-    },
-    {
-      id: 3,
-      name: 'DRESSES',
-      image: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=800&auto=format&fit=crop',
-      subCategories: [
-        { 
-          name: 'MAXI', 
-          subtitle: 'LONG & ELEGANT', 
-          image: 'https://images.unsplash.com/photo-1572804013427-4d7ca7268217?q=80&w=800&auto=format&fit=crop' 
-        },
-        { 
-          name: 'MIDI', 
-          subtitle: 'CASUAL CHIC', 
-          image: 'https://images.unsplash.com/photo-1515347619152-169824056262?q=80&w=800&auto=format&fit=crop' 
+  // 📡 2. Error-Free Fetch: Only grab women's categories from the Database
+  useEffect(() => {
+    fetch('http://localhost:5000/api/categories')
+      .then(res => {
+        if (!res.ok) throw new Error('Network error');
+        return res.json();
+      })
+      .then(data => {
+        if (Array.isArray(data)) {
+          // Filter ONLY the women's department
+          const womenData = data.filter(c => c.department === 'women');
+          setCategories(womenData);
         }
-      ]
-    },
-    {
-      id: 4,
-      name: 'TOPS',
-      image: 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=800&auto=format&fit=crop',
-      subCategories: null
-    },
-    {
-      id: 5,
-      name: 'JUMPSUIT',
-      image: 'https://images.unsplash.com/photo-1485231183945-ffe14b8a43ec?q=80&w=800&auto=format&fit=crop',
-      subCategories: null
-    },
-    {
-      id: 6,
-      name: 'BOTTOM',
-      image: 'https://images.unsplash.com/photo-1509551388413-e18d0ac5d495?q=80&w=800&auto=format&fit=crop',
-      subCategories: null
-    }
-  ];
+      })
+      .catch(err => console.error("Error fetching women categories:", err))
+      .finally(() => setLoading(false));
+  }, []);
 
   const closeModal = (e) => {
     if (e.target.id === 'modal-overlay') {
@@ -59,37 +47,76 @@ const WomenCategories = () => {
     }
   };
 
+  const handleCategoryClick = (category) => {
+    // Open modal if it has subcategories, otherwise go straight to the collection
+    if (category.subCategories && category.subCategories.length > 0) {
+      setActiveModal(category);
+    } else {
+      navigate(`/collections/${category.slug}`);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#1a1a1a] pt-32 flex justify-center">
+        <p className="text-gray-500 font-bold tracking-widest uppercase text-sm animate-pulse">Loading Categories...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#1a1a1a] pt-32 pb-12 px-6 lg:px-12 font-sans relative">
       
       <div className="mb-8">
-        {/* Updated text to WOMEN */}
-        <h2 className="text-sm font-bold tracking-[0.2em] text-gray-400">WOMEN</h2>
+        <h2 className="text-sm font-bold tracking-[0.2em] text-[#cc0000]">WOMEN</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {categories.map((category) => (
-          <div 
-            key={category.id}
-            onClick={() => category.subCategories ? setActiveModal(category) : console.log(`Go to ${category.name} page`)}
-            className="group relative h-100 lg:h-125 w-full rounded-2xl overflow-hidden cursor-pointer bg-neutral-900"
-          >
-            <img 
-              src={category.image} 
-              alt={category.name} 
-              className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 ease-in-out"
-            />
-            <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent"></div>
+        
+        {/* Static "New Arrival" Tile */}
+        <div 
+          onClick={() => navigate('/collections/new-arrivals')}
+          className="group relative h-100 lg:h-125 w-full rounded-2xl overflow-hidden cursor-pointer bg-neutral-900"
+        >
+          <img 
+            src={categoryImages['new-arrivals']} 
+            alt="New Arrival" 
+            className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 ease-in-out" 
+          />
+          <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent"></div>
+          <h3 className="absolute bottom-4 left-4 right-4 text-5xl lg:text-6xl font-black text-white/90 uppercase leading-[0.85] tracking-tighter drop-shadow-xl group-hover:text-white transition-colors duration-300">
+            <span className="block">NEW</span><span className="block">ARRIVAL</span>
+          </h3>
+        </div>
 
-            <h3 className="absolute bottom-4 left-4 right-4 text-5xl lg:text-6xl font-black text-white/90 uppercase leading-[0.85] tracking-tighter drop-shadow-xl group-hover:text-white transition-colors duration-300">
-              {category.name.split(' ').map((word, idx) => (
-                <span key={idx} className="block">{word}</span>
-              ))}
-            </h3>
-          </div>
-        ))}
+        {/* 🔄 Dynamic DB Categories Map */}
+        {categories.map((category) => {
+          // Look up the image based on the DB slug, otherwise use fallback
+          const bgImage = categoryImages[category.slug] || fallbackImage;
+
+          return (
+            <div 
+              key={category._id}
+              onClick={() => handleCategoryClick(category)} 
+              className="group relative h-100 lg:h-125 w-full rounded-2xl overflow-hidden cursor-pointer bg-neutral-900"
+            >
+              <img 
+                src={bgImage} 
+                alt={category.name} 
+                className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 ease-in-out"
+              />
+              <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent"></div>
+              <h3 className="absolute bottom-4 left-4 right-4 text-5xl lg:text-6xl font-black text-white/90 uppercase leading-[0.85] tracking-tighter drop-shadow-xl group-hover:text-white transition-colors duration-300">
+                {category.name.split(' ').map((word, idx) => (
+                  <span key={idx} className="block">{word}</span>
+                ))}
+              </h3>
+            </div>
+          );
+        })}
       </div>
 
+      {/* THE POP-UP MODAL FOR SUB-CATEGORIES */}
       {activeModal && (
         <div 
           id="modal-overlay"
@@ -109,26 +136,36 @@ const WomenCategories = () => {
             </div>
 
             <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {activeModal.subCategories?.map((sub, idx) => (
-                <div key={idx} className="group cursor-pointer">
-                  <div className="relative h-75 sm:h-100 w-full rounded-xl overflow-hidden mb-3">
-                    <img 
-                      src={sub.image} 
-                      alt={sub.name} 
-                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent"></div>
-                    <h5 className="absolute bottom-4 left-0 w-full text-center text-4xl font-black text-white uppercase leading-none tracking-tight drop-shadow-md">
-                      {sub.name.split(' ').map((word, i) => (
-                        <span key={i} className="block">{word}</span>
-                      ))}
-                    </h5>
+              {activeModal.subCategories?.map((sub, idx) => {
+                // Look up sub-category image
+                const subBgImage = categoryImages[sub.slug] || fallbackImage;
+
+                return (
+                  <div 
+                    key={idx} 
+                    className="group cursor-pointer"
+                    onClick={() => navigate(`/collections/${sub.slug}`)} 
+                  >
+                    <div className="relative h-75 sm:h-100 w-full rounded-xl overflow-hidden mb-3">
+                      <img 
+                        src={subBgImage} 
+                        alt={sub.name} 
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent"></div>
+                      <h5 className="absolute bottom-4 left-0 w-full text-center text-4xl font-black text-white uppercase leading-none tracking-tight drop-shadow-md">
+                        {sub.name.split(' ').map((word, i) => (
+                          <span key={i} className="block">{word}</span>
+                        ))}
+                      </h5>
+                    </div>
+                    {/* Database subcategories might not have a subtitle field, fallback to generic text if missing */}
+                    <p className="text-center text-[10px] font-bold tracking-widest text-gray-900 uppercase group-hover:text-[#cc0000] transition-colors">
+                      {sub.subtitle || 'DISCOVER MORE'}
+                    </p>
                   </div>
-                  <p className="text-center text-[10px] font-bold tracking-widest text-gray-900 uppercase group-hover:text-[#cc0000] transition-colors">
-                    {sub.subtitle}
-                  </p>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="p-4 bg-gray-50 flex justify-center border-t border-gray-100 sm:hidden">

@@ -1,76 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import logo from '../Images/reyal-logo.png'; 
 import { Link } from 'react-router-dom';
-import fullSleeveImg from '../Images/full-sleeve.jpg';
-import halfSleeveImg from '../Images/half-sleeve.jpg';
-import { useSelector , useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { toggleCart } from '../redux/cartSlice';
+import SearchOverlay from './SearchOverlay'; 
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState('MAN');
-  const [activeModal, setActiveModal] = useState(null);
+  const [openDropdown, setOpenDropdown] = useState('SHOP');
+  const [openDepartment, setOpenDepartment] = useState(null);
+  const [openSubCategory, setOpenSubCategory] = useState(null);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  
+  // Initialize with an empty array to prevent mapping errors
+  const [categories, setCategories] = useState([]); 
+  
   const totalQuantity = useSelector(state => state.cart.totalQuantity);
   const dispatch = useDispatch();
 
+  // 🛡️ ERROR-FREE FETCH: Safely handles non-array responses
+  useEffect(() => {
+    fetch('http://localhost:5000/api/categories')
+      .then(res => {
+        if (!res.ok) throw new Error('Network response was not ok');
+        return res.json();
+      })
+      .then(data => {
+        // Only set categories if the backend actually sent an array
+        if (Array.isArray(data)) {
+          setCategories(data);
+        } else {
+          setCategories([]); 
+        }
+      })
+      .catch(err => {
+        console.error("Error fetching categories:", err);
+        setCategories([]); // Fallback to empty array on fail
+      });
+  }, []);
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
-    if (isMenuOpen) setActiveModal(null); 
   };
   
   const toggleDropdown = (category) => {
     setOpenDropdown(openDropdown === category ? null : category);
   };
 
-  // 1. Added paths to the modal subcategories
-  const casualShirtsModalData = {
-    name: 'CASUAL SHIRTS',
-    subCategories: [
-      { name: 'FULL SLEEVES', subtitle: 'FULL SLEEVES SHIRT', image: fullSleeveImg, path: '/collections/casual-full-sleeves' },
-      { name: 'HALF SLEEVES', subtitle: 'HALF SLEEVES SHIRT', image: halfSleeveImg, path: '/collections/casual-half-sleeves' }
-    ]
+  const toggleDepartment = (dept) => {
+    setOpenDepartment(openDepartment === dept ? null : dept);
+    setOpenSubCategory(null);
   };
 
-  // 2. Added explicit dynamic paths to ALL Men's categories
-  const manCategories = [
-    { name: 'NEW ARRIVAL', isRed: true, path: '/new-arrivals' }, 
-    { name: 'PANJABI', path: '/collections/panjabi' }, 
-    { name: 'CASUAL SHIRTS', hasModal: true }, 
-    { name: 'FORMAL SHIRTS', path: '/collections/formal' }, 
-    { name: 'POLO', path: '/collections/polo' }, 
-    { name: 'T-SHIRTS', path: '/collections/t-shirts' }, 
-    { name: 'JEANS', path: '/collections/jeans' }, 
-    { name: 'CARGO', path: '/collections/cargo' }, 
-    { name: 'TWILL PANTS', path: '/collections/twill-pants' }, 
-    { name: 'FORMAL PANTS', path: '/collections/formal-pants' }, 
-    { name: 'PAJAMA', path: '/collections/pajama' }, 
-    { name: 'SHORTS', path: '/collections/shorts' }, 
-    { name: 'BLAZERS', path: '/collections/blazers' }, 
-    { name: 'SUITS', path: '/collections/suits' }
-  ];
-
-  // 3. Added explicit dynamic paths to ALL Women's categories
-  const womenCategories = [
-    { name: 'NEW ARRIVAL', isRed: true, path: '/new-arrivals' }, 
-    { name: 'KURTI', path: '/collections/kurti' }, 
-    { name: 'DRESSES', path: '/collections/dresses' }, 
-    { name: 'TOPS', path: '/collections/tops' }, 
-    { name: 'JUMPSUIT', path: '/collections/jumpsuit' }, 
-    { name: 'BOTTOM', path: '/collections/bottom' }
-  ];
-
-  const infoCategories = [
-    { name: 'About Reyal' }, { name: 'Find a Store' }, { name: 'Terms & Condition' }, 
-    { name: 'Privacy Policy' }, { name: 'Refund & Return Policy' }
-  ];
+  const toggleSubCategory = (categoryId) => {
+    setOpenSubCategory(openSubCategory === categoryId ? null : categoryId);
+  };
 
   const handleLinkClick = () => {
     setIsMenuOpen(false);
   };
 
+  // 🛡️ SAFETY CHECK: Ensures .filter() never crashes the app
+  const manCategories = Array.isArray(categories) ? categories.filter(c => c.department === 'man') : [];
+  const womenCategories = Array.isArray(categories) ? categories.filter(c => c.department === 'women') : [];
+
+  const infoCategories = [
+    { name: 'About Reyal', path: '/about' }, 
+    { name: 'Find a Store', path: '/store-locator' }, 
+    { name: 'Terms & Condition', path: '/terms' }, 
+    { name: 'Privacy Policy', path: '/privacy' }, 
+    { name: 'Refund & Return Policy', path: '/refunds' }
+  ];
+
   return (
     <>
-      {/* MAIN NAVBAR */}
       <nav className="fixed top-0 w-full z-40 bg-transparent text-white font-sans transition-all duration-300">
         <div className="relative flex items-center justify-between px-6 lg:px-12 h-24 sm:h-28">
           
@@ -91,32 +94,30 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Desktop Search */}
-          <div className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-4 group cursor-text">
+          <button 
+            onClick={() => setIsSearchOpen(true)} 
+            className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-4 group cursor-pointer focus:outline-none"
+          >
             <span className="text-[11px] font-bold tracking-[0.25em] text-gray-300 group-hover:text-yellow-500 transition-colors mt-0.5">SEARCH</span>
             <div className="w-32 xl:w-48 h-px bg-gray-400 group-hover:bg-yellow-500 transition-colors"></div>
-          </div>
+          </button>
 
           <div className="flex items-center gap-5 lg:gap-10">
-            {/* Desktop Login & Help Text */}
-            <Link to="/login" className="text-[11px] font-bold tracking-[0.25em] text-gray-300 hover:text-yellow-500 transition-colors hidden md:block mt-0.5">LOGIN</Link>
+            <Link to="/profile" className="text-[11px] font-bold tracking-[0.2em] text-gray-300 hover:text-yellow-500 transition-colors hidden md:block mt-0.5">ACCOUNT</Link>
             <Link to="/help" className="text-[11px] font-bold tracking-[0.25em] text-gray-300 hover:text-yellow-500 transition-colors hidden md:block mt-0.5">HELP</Link>
             
-            {/* Mobile User Icon */}
-            <Link to="/login" onClick={handleLinkClick} className="text-gray-300 hover:text-yellow-500 transition-colors md:hidden focus:outline-none">
-               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 sm:w-6 sm:h-6">
-                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-               </svg>
+            <Link to="/profile" onClick={handleLinkClick} className="text-gray-300 hover:text-yellow-500 transition-colors md:hidden focus:outline-none">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 sm:w-6 sm:h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+              </svg>
             </Link>
 
-            {/* Cart Icon */}
             <button 
               onClick={() => dispatch(toggleCart())} 
               className="flex items-center gap-2 text-gray-300 hover:text-yellow-500 transition-colors focus:outline-none group">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 lg:w-6 lg:h-6 group-hover:-translate-y-1 transition-transform">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
               </svg>
-                {/* The magic happens here! */}
               <span className="text-sm lg:text-base font-medium mt-0.5">{totalQuantity}</span>
             </button>
           </div>
@@ -124,10 +125,8 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* OVERLAY */}
       <div className={`fixed inset-0 bg-black/80 backdrop-blur-sm z-40 transition-opacity duration-500 ${isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`} onClick={toggleMenu}></div>
       
-      {/* SLIDE-OUT SIDEBAR */}
       <div className={`fixed top-0 left-0 h-dvh w-full sm:w-100 bg-neutral-950 border-r border-yellow-500/20 z-50 transform transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] flex flex-col ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         
         <div className="flex-none flex items-center justify-between p-8 sm:p-12 pb-6">
@@ -142,74 +141,118 @@ const Navbar = () => {
         <div className="flex-1 overflow-y-auto px-8 sm:px-12 pb-32 hide-scroll" style={{ WebkitOverflowScrolling: 'touch' }}>
           <nav className="flex flex-col gap-6 mt-4">
             
-            {/* MAN SECTION */}
+            {/* SHOP SECTION */}
             <div>
               <div className="flex items-center justify-between w-full">
-                <Link to="/man" onClick={handleLinkClick} className="text-xl sm:text-2xl font-black tracking-widest text-white hover:text-yellow-500 transition-colors uppercase text-left">
-                  Man
+                <Link to="/shop" onClick={handleLinkClick} className="text-xl sm:text-2xl font-black tracking-widest text-white hover:text-yellow-500 transition-colors uppercase text-left">
+                  Shop
                 </Link>
-                <button onClick={() => toggleDropdown('MAN')} className="text-gray-400 hover:text-yellow-500 p-2 focus:outline-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={`w-5 h-5 transition-transform duration-300 ${openDropdown === 'MAN' ? 'rotate-180' : ''}`}>
+                <button onClick={() => toggleDropdown('SHOP')} className="text-gray-400 hover:text-yellow-500 p-2 focus:outline-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={`w-5 h-5 transition-transform duration-300 ${openDropdown === 'SHOP' ? 'rotate-180' : ''}`}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                   </svg>
                 </button>
               </div>
               
-              <div className={`flex flex-col gap-4 ml-4 overflow-hidden transition-all duration-500 ease-in-out ${openDropdown === 'MAN' ? 'max-h-250 opacity-100 mt-6' : 'max-h-0 opacity-0 mt-0'}`}>
-                {manCategories.map((item, idx) => (
-                  <div key={`man-${idx}`} className="w-full">
-                    {item.hasModal ? (
-                      <button 
-                        onClick={() => setActiveModal(casualShirtsModalData)}
-                        className={`text-[11px] sm:text-xs font-normal tracking-[0.15em] transition-colors flex items-center justify-between w-full sm:w-4/5 text-gray-400 hover:text-white`}
-                      >
-                        {item.name}
-                        <span className="text-sm font-light">+</span>
-                      </button>
-                    ) : (
-                      // 4. Changed to={item.path}
-                      <Link 
-                        to={item.path} 
-                        onClick={handleLinkClick} 
-                        className={`text-[11px] sm:text-xs font-normal tracking-[0.15em] transition-colors flex items-center justify-between w-full sm:w-4/5 ${
-                          item.isRed ? 'text-[#cc0000] hover:text-red-400 font-medium' : 'text-gray-400 hover:text-white'
-                        }`}
-                      >
-                        {item.name}
-                      </Link>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* WOMEN SECTION */}
-            <div>
-              <div className="flex items-center justify-between w-full mt-2">
-                <Link to="/women" onClick={handleLinkClick} className="text-xl sm:text-2xl font-black tracking-widest text-white hover:text-yellow-500 transition-colors uppercase text-left">
-                  Women
+              <div className={`flex flex-col gap-4 overflow-hidden transition-all duration-500 ease-in-out ${openDropdown === 'SHOP' ? 'max-h-375 opacity-100 mt-6' : 'max-h-0 opacity-0 mt-0'}`}>
+                
+                <Link to="/new-arrivals" onClick={handleLinkClick} className="text-[11px] sm:text-xs font-bold tracking-[0.15em] transition-colors flex items-center justify-between w-full sm:w-4/5 text-[#cc0000] hover:text-red-400">
+                  NEW ARRIVAL
                 </Link>
-                <button onClick={() => toggleDropdown('WOMEN')} className="text-gray-400 hover:text-yellow-500 p-2 focus:outline-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={`w-5 h-5 transition-transform duration-300 ${openDropdown === 'WOMEN' ? 'rotate-180' : ''}`}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                  </svg>
-                </button>
-              </div>
 
-              <div className={`flex flex-col gap-4 ml-4 overflow-hidden transition-all duration-500 ease-in-out ${openDropdown === 'WOMEN' ? 'max-h-200 opacity-100 mt-6' : 'max-h-0 opacity-0 mt-0'}`}>
-                {womenCategories.map((item, idx) => (
-                  // 5. Changed to={item.path}
-                  <Link 
-                    key={`woman-${idx}`} 
-                    to={item.path} 
-                    onClick={handleLinkClick}
-                    className={`text-[11px] sm:text-xs font-normal tracking-[0.15em] transition-colors flex items-center justify-between w-full sm:w-4/5 ${
-                      item.isRed ? 'text-[#cc0000] hover:text-red-400 font-medium' : 'text-gray-400 hover:text-white'
-                    }`}
-                  >
-                    {item.name}
-                  </Link>
-                ))}
+                {/* MAN DEPARTMENT FOLDER */}
+                <div className="w-full mt-2">
+                  <button onClick={() => toggleDepartment('MAN')} className="flex items-center justify-between w-full sm:w-4/5 text-[11px] sm:text-xs font-bold tracking-[0.15em] text-white hover:text-yellow-500 uppercase transition-colors">
+                    MAN
+                    <span className="text-lg font-light leading-none">{openDepartment === 'MAN' ? '-' : '+'}</span>
+                  </button>
+                  
+                  <div className={`flex flex-col gap-3 ml-4 overflow-hidden transition-all duration-300 ease-in-out ${openDepartment === 'MAN' ? 'max-h-200 opacity-100 mt-4' : 'max-h-0 opacity-0 mt-0'}`}>
+                    {manCategories.map(cat => (
+                      <div key={cat._id} className="w-full">
+                        {cat.subCategories && cat.subCategories.length > 0 ? (
+                          <>
+                            <button 
+                              onClick={() => toggleSubCategory(cat._id)} 
+                              className="flex items-center justify-between w-full sm:w-4/5 text-[10px] sm:text-[11px] font-normal tracking-[0.15em] text-gray-400 hover:text-white uppercase transition-colors"
+                            >
+                              {cat.name}
+                              <span className="text-lg font-light leading-none">{openSubCategory === cat._id ? '-' : '+'}</span>
+                            </button>
+                            
+                            <div className={`flex flex-col gap-2 ml-4 overflow-hidden transition-all duration-300 ease-in-out ${openSubCategory === cat._id ? 'max-h-75 opacity-100 mt-2' : 'max-h-0 opacity-0 mt-0'}`}>
+                              {cat.subCategories.map(sub => (
+                                <Link 
+                                  key={sub.slug} 
+                                  to={`/collections/${sub.slug}`} 
+                                  onClick={handleLinkClick} 
+                                  className="text-[9px] sm:text-[10px] font-normal tracking-[0.15em] text-gray-500 hover:text-yellow-500 uppercase transition-colors"
+                                >
+                                  {sub.name}
+                                </Link>
+                              ))}
+                            </div>
+                          </>
+                        ) : (
+                          <Link 
+                            to={`/collections/${cat.slug}`} 
+                            onClick={handleLinkClick} 
+                            className="text-[10px] sm:text-[11px] font-normal tracking-[0.15em] text-gray-400 hover:text-white uppercase transition-colors block"
+                          >
+                            {cat.name}
+                          </Link>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* WOMEN DEPARTMENT FOLDER */}
+                <div className="w-full mt-2">
+                  <button onClick={() => toggleDepartment('WOMEN')} className="flex items-center justify-between w-full sm:w-4/5 text-[11px] sm:text-xs font-bold tracking-[0.15em] text-white hover:text-yellow-500 uppercase transition-colors">
+                    WOMEN
+                    <span className="text-lg font-light leading-none">{openDepartment === 'WOMEN' ? '-' : '+'}</span>
+                  </button>
+                  
+                  <div className={`flex flex-col gap-3 ml-4 overflow-hidden transition-all duration-300 ease-in-out ${openDepartment === 'WOMEN' ? 'max-h-200 opacity-100 mt-4' : 'max-h-0 opacity-0 mt-0'}`}>
+                    {womenCategories.map(cat => (
+                      <div key={cat._id} className="w-full">
+                        {cat.subCategories && cat.subCategories.length > 0 ? (
+                          <>
+                            <button 
+                              onClick={() => toggleSubCategory(cat._id)} 
+                              className="flex items-center justify-between w-full sm:w-4/5 text-[10px] sm:text-[11px] font-normal tracking-[0.15em] text-gray-400 hover:text-white uppercase transition-colors"
+                            >
+                              {cat.name}
+                              <span className="text-lg font-light leading-none">{openSubCategory === cat._id ? '-' : '+'}</span>
+                            </button>
+                            <div className={`flex flex-col gap-2 ml-4 overflow-hidden transition-all duration-300 ease-in-out ${openSubCategory === cat._id ? 'max-h-75 opacity-100 mt-2' : 'max-h-0 opacity-0 mt-0'}`}>
+                              {cat.subCategories.map(sub => (
+                                <Link 
+                                  key={sub.slug} 
+                                  to={`/collections/${sub.slug}`} 
+                                  onClick={handleLinkClick} 
+                                  className="text-[9px] sm:text-[10px] font-normal tracking-[0.15em] text-gray-500 hover:text-yellow-500 uppercase transition-colors"
+                                >
+                                  {sub.name}
+                                </Link>
+                              ))}
+                            </div>
+                          </>
+                        ) : (
+                          <Link 
+                            to={`/collections/${cat.slug}`} 
+                            onClick={handleLinkClick} 
+                            className="text-[10px] sm:text-[11px] font-normal tracking-[0.15em] text-gray-400 hover:text-white uppercase transition-colors block"
+                          >
+                            {cat.name}
+                          </Link>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
               </div>
             </div>
             
@@ -226,7 +269,7 @@ const Navbar = () => {
 
               <div className={`flex flex-col gap-3 ml-10 overflow-hidden transition-all duration-500 ease-in-out ${openDropdown === 'INFO' ? 'max-h-125 opacity-100 mt-5' : 'max-h-0 opacity-0 mt-0'}`}>
                 {infoCategories.map((item, idx) => (
-                  <Link key={`info-${idx}`} to="#" onClick={handleLinkClick} className="text-[11px] sm:text-xs font-normal tracking-[0.05em] text-gray-400 hover:text-white transition-colors">
+                  <Link key={`info-${idx}`} to={item.path} onClick={handleLinkClick} className="text-[11px] sm:text-xs font-normal tracking-[0.05em] text-gray-400 hover:text-white transition-colors uppercase">
                     {item.name}
                   </Link>
                 ))}
@@ -235,81 +278,30 @@ const Navbar = () => {
             
           </nav>
 
-          {/* Bottom Sidebar Utilities */}
           <div className="mt-12 flex flex-col gap-6 md:hidden">
-            <div className="flex items-center gap-3 group cursor-text">
+            
+            {/* 4. MOBILE SEARCH BUTTON */}
+            <button 
+              onClick={() => { setIsSearchOpen(true); setIsMenuOpen(false); }} 
+              className="flex items-center gap-3 group cursor-pointer focus:outline-none w-full text-left"
+            >
               <span className="text-[10px] font-bold tracking-[0.2em] text-gray-400 group-hover:text-yellow-500 transition-colors">SEARCH</span>
               <div className="w-full max-w-25 h-px bg-gray-600 group-hover:bg-yellow-500 transition-colors"></div>
-            </div>
-            <Link to="/login" onClick={handleLinkClick} className="text-[10px] font-bold tracking-[0.2em] text-gray-400 hover:text-yellow-500">LOGIN</Link>
-            <Link to="/help" onClick={handleLinkClick} className="text-[10px] font-bold tracking-[0.2em] text-gray-400 hover:text-yellow-500">HELP</Link>
+            </button>
+            
+            <Link to="/profile" onClick={handleLinkClick} className="text-[10px] font-bold tracking-[0.2em] text-gray-400 hover:text-yellow-500 uppercase">LOGIN</Link>
+            <Link to="/help" onClick={handleLinkClick} className="text-[10px] font-bold tracking-[0.2em] text-gray-400 hover:text-yellow-500 uppercase">HELP</Link>
           </div>
 
         </div>
       </div>
 
-      {/* POP-UP MODAL */}
-      {activeModal && (
-        <div 
-          id="navbar-modal-overlay"
-          onClick={(e) => e.target.id === 'navbar-modal-overlay' && setActiveModal(null)}
-          className="fixed inset-0 z-60 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-[fadeIn_0.2s_ease-out]"
-        >
-          <div className="bg-white rounded-lg w-full max-w-3xl overflow-hidden shadow-2xl animate-[slideUp_0.3s_ease-out]">
-            
-            <div className="relative border-b border-gray-100 p-4 flex justify-center items-center">
-              <h4 className="text-sm font-bold tracking-[0.15em] text-gray-800 uppercase">
-                {activeModal.name}
-              </h4>
-              <div className="absolute right-6 top-1/2 -translate-y-1/2 flex flex-col gap-2">
-                 <div className="w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-b-[6px] border-b-gray-400"></div>
-                 <div className="w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-[6px] border-t-gray-400"></div>
-              </div>
-            </div>
+      {/* 5. RENDER THE OVERLAY */}
+      <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
 
-            <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {activeModal.subCategories.map((sub, idx) => (
-                <Link 
-                  key={idx} 
-                  to={sub.path} 
-                  onClick={(e) => {
-                    if (sub.path === '#') e.preventDefault();
-                    else {
-                      setActiveModal(null);
-                      setIsMenuOpen(false); 
-                    }
-                  }}
-                  className="group cursor-pointer block"
-                >
-                  <div className="relative h-75 sm:h-100 w-full rounded-xl overflow-hidden mb-3">
-                    <img src={sub.image} alt={sub.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent"></div>
-                    <h5 className="absolute bottom-4 left-0 w-full text-center text-4xl font-black text-white uppercase leading-none tracking-tight drop-shadow-md">
-                      {sub.name.split(' ').map((word, i) => (
-                        <span key={i} className="block">{word}</span>
-                      ))}
-                    </h5>
-                  </div>
-                  <p className="text-center text-[10px] font-bold tracking-widest text-gray-900 uppercase group-hover:text-[#cc0000] transition-colors">
-                    {sub.subtitle}
-                  </p>
-                </Link>
-              ))}
-            </div>
-
-            <div className="p-4 bg-gray-50 flex justify-center border-t border-gray-100 sm:hidden">
-                <button onClick={() => setActiveModal(null)} className="text-xs font-bold tracking-widest text-gray-500">CLOSE</button>
-            </div>
-
-          </div>
-        </div>
-      )}
-      
       <style>{`
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
       `}</style>
     </>
   );

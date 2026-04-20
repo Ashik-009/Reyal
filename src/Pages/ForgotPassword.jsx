@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { sendPasswordResetEmail } from 'firebase/auth';
-import { auth } from '../firebase'; 
 import { FaEnvelope } from 'react-icons/fa';
+
+// FIREBASE IMPORTS REMOVED
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -17,11 +17,26 @@ const ForgotPassword = () => {
     setLoading(true);
 
     try {
-      await sendPasswordResetEmail(auth, email);
+      // Send the request to your custom Node.js backend
+      const response = await fetch('http://localhost:5000/api/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send reset email. Make sure this email is registered.');
+      }
+
       setMessage('Password reset email sent! Check your inbox.');
       setEmail(''); // Clear the input field after success
+      
     } catch (err) {
-      setError('Failed to send reset email. Make sure this email is registered.');
+      setError(err.message);
       console.error(err);
     } finally {
       setLoading(false);

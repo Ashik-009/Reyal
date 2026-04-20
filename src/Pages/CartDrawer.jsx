@@ -1,11 +1,10 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { toggleCart, removeItem } from '../redux/cartSlice';
+import { toggleCart, removeItem, increaseQuantity, decreaseQuantity } from '../redux/cartSlice';
 import { Link } from 'react-router-dom';
 
 const CartDrawer = () => {
   const dispatch = useDispatch();
-  // Grab all the cart data from Redux
   const { items, totalQuantity, totalAmount, isCartOpen } = useSelector((state) => state.cart);
 
   return (
@@ -41,24 +40,56 @@ const CartDrawer = () => {
           ) : (
             <div className="flex flex-col gap-6">
               {items.map((item, index) => (
-                <div key={`${item.id}-${item.size}-${index}`} className="flex gap-4 bg-neutral-900 p-3 rounded-xl border border-white/5">
+                <div key={`${item.id}-${item.size}-${index}`} className="flex gap-4 bg-neutral-900 p-3 rounded-xl border border-white/5 group">
                   
                   {/* Item Image */}
-                  <div className="w-24 h-32 shrink-0 bg-black rounded-lg overflow-hidden">
-                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                  </div>
+                  <Link 
+                    to={`/product/${item.id}`} 
+                    onClick={() => dispatch(toggleCart())}
+                    className="w-24 h-32 shrink-0 bg-black rounded-lg overflow-hidden block"
+                  >
+                    <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  </Link>
 
                   {/* Item Details */}
                   <div className="flex flex-col justify-between py-1 grow">
                     <div>
-                      <h3 className="text-white text-xs font-bold tracking-wide uppercase leading-snug">{item.name}</h3>
-                      <p className="text-gray-400 text-[10px] font-bold tracking-widest mt-1">SIZE: {item.size}</p>
-                      <p className="text-gray-400 text-[10px] font-bold tracking-widest mt-1">QTY: {item.quantity}</p>
+                      {/* Item Name */}
+                      <Link 
+                        to={`/product/${item.id}`} 
+                        onClick={() => dispatch(toggleCart())}
+                      >
+                        <h3 className="text-white text-xs font-bold tracking-wide uppercase leading-snug hover:text-yellow-500 transition-colors">
+                          {item.name}
+                        </h3>
+                      </Link>
+                      <p className="text-gray-400 text-[10px] font-bold tracking-widest mt-1 mb-2">SIZE: {item.size}</p>
+                      
+                      {/* QUANTITY CONTROLS */}
+                      <div className="flex items-center">
+                        <div className="flex items-center bg-black border border-gray-800 rounded">
+                          <button 
+                            onClick={() => dispatch(decreaseQuantity({ id: item.id, size: item.size }))}
+                            className="w-7 h-7 flex items-center justify-center text-gray-500 hover:text-white hover:bg-gray-800 transition-colors rounded-l"
+                          >
+                            -
+                          </button>
+                          <span className="w-6 text-center text-[10px] font-bold text-white">
+                            {item.quantity}
+                          </span>
+                          <button 
+                            onClick={() => dispatch(increaseQuantity({ id: item.id, size: item.size }))}
+                            className="w-7 h-7 flex items-center justify-center text-gray-500 hover:text-white hover:bg-gray-800 transition-colors rounded-r"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
                     </div>
                     
-                    <div className="flex justify-between items-end">
+                    <div className="flex justify-between items-end mt-2">
                       <p className="text-yellow-500 text-sm font-bold tracking-widest">
-                        ৳ {item.totalPrice.toLocaleString()}
+                        ৳ {item.totalPrice?.toLocaleString()}
                       </p>
                       <button 
                         onClick={() => dispatch(removeItem({ id: item.id, size: item.size }))}
@@ -80,16 +111,25 @@ const CartDrawer = () => {
           <div className="flex-none p-6 sm:p-8 border-t border-gray-800 bg-neutral-950">
             <div className="flex justify-between items-center mb-6">
               <span className="text-sm font-bold tracking-[0.2em] text-gray-400 uppercase">Subtotal</span>
-              <span className="text-xl font-black text-white tracking-widest">৳ {totalAmount.toLocaleString()}</span>
+              <span className="text-xl font-black text-white tracking-widest">৳ {totalAmount?.toLocaleString()}</span>
             </div>
             <p className="text-[10px] text-gray-500 tracking-widest uppercase text-center mb-6">Shipping & taxes calculated at checkout</p>
+            
             <Link 
               to="/checkout" 
               onClick={() => dispatch(toggleCart())}
-              className="w-full block text-center bg-[#cc0000] text-white font-black tracking-[0.2em] text-sm uppercase py-5 rounded-lg hover:bg-[#ff1a1a] transition-colors"
+              className="w-full block text-center bg-[#cc0000] text-white font-black tracking-[0.2em] text-sm uppercase py-5 rounded-lg hover:bg-[#ff1a1a] transition-colors shadow-[0_0_20px_rgba(204,0,0,0.2)]"
             >
               Checkout
             </Link>
+
+            {/* 🛍️ NEW: Secondary Continue Shopping Button */}
+            <button 
+              onClick={() => dispatch(toggleCart())}
+              className="w-full mt-3 block text-center bg-transparent border border-gray-800 text-gray-400 font-bold tracking-[0.2em] text-xs uppercase py-4 rounded-lg hover:bg-white/5 hover:text-white transition-colors"
+            >
+              Continue Shopping
+            </button>
           </div>
         )}
 
